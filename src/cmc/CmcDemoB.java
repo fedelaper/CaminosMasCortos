@@ -31,13 +31,15 @@ public class CmcDemoB {
 		List<Punto> listaPuntos = expandirPuntosContiguos(a, b);
 		cmc.dibujarCamino(listaPuntos,Color.red);
 		mapa.enviarMensaje("Camino minimo: " + listaPuntos.size() + " puntos");
+		
 	}
 	
 	private List<Punto> expandirPuntosContiguos(Punto a, Punto b) {
 		List<Punto> listaPuntos = new ArrayList<Punto>();
 		if (a.x < b.x) {
 			for(int x = a.x ; x < b.x; x++) {
-				listaPuntos.add(new Punto(x, a.y));
+				listaPuntos.add(new Punto(x, a.y));	
+				mapa.getDensidad(x, a.y);
 			}
 		} else {
 			for(int x = a.x ; x > b.x; x--) {
@@ -55,5 +57,10 @@ public class CmcDemoB {
 		}
 		cmc.dibujarCamino(listaPuntos);
 		return listaPuntos;
+	}
+	
+	private List<Punto> expandirCaminoIdeal(Punto a, Punto b){
+		List<Punto> listaPuntos = new ArrayList<Punto>();
+		
 	}
 }
