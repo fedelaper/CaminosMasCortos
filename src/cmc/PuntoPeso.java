@@ -9,8 +9,7 @@ import graficos.Punto;
  * @author alu603
  *
  */
-public class PuntoPeso implements Comparable <PuntoPeso>{
-
+public class PuntoPeso implements Comparable<PuntoPeso> {
 	private Punto punto;
 	private int peso;
 	private int pesoAcumulado;
@@ -29,19 +28,49 @@ public class PuntoPeso implements Comparable <PuntoPeso>{
 	}
 
 	public PuntoPeso() {
-		// TODO Auto-generated constructor stub
+
 	}
 
 	public PuntoPeso(PuntoPeso aux) {
 		super();
-		this.punto = new Punto((int)aux.getPunto().getX(), (int)aux.getPunto().getY());
+		this.punto = new Punto((int) aux.getPunto().getX(), (int) aux.getPunto().getY());
 		this.peso = aux.getPeso();
 		this.pesoAcumulado = aux.getPesoAcumulado();
 		this.distanciaAlDestino = aux.getDistanciaAlDestino();
 		this.totalPesoDistancia = aux.getPesoAcumulado() + aux.getDistanciaAlDestino();
 		this.predecesor = aux.getPredecesor();
 	}
-	
+
+	@Override
+	public int compareTo(PuntoPeso puntoPeso) {
+		int valorDeRetorno = 0;
+		if (this.totalPesoDistancia < puntoPeso.getTotalPesoDistancia()) {
+			valorDeRetorno = -1;
+		} else if (this.totalPesoDistancia > puntoPeso.getTotalPesoDistancia()) {
+			valorDeRetorno = 1;
+		} else {
+			if (this.distanciaAlDestino < puntoPeso.getDistanciaAlDestino()) {
+				valorDeRetorno = -1;
+			} else {
+				valorDeRetorno = 1;
+			}
+		}
+		return valorDeRetorno;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+
+		if (o == this)
+			return true;
+		if (!(o instanceof PuntoPeso)) {
+			return false;
+		}
+
+		PuntoPeso pp = (PuntoPeso) o;
+		return (pp.getPunto().getX() == this.getPunto().getX() && pp.getPunto().getY() == this.getPunto().getY());
+	}
+
 	public int getX() {
 		return this.punto.x;
 	}
@@ -77,9 +106,9 @@ public class PuntoPeso implements Comparable <PuntoPeso>{
 	public int getPeso() {
 		return peso;
 	}
-	
+
 	public int getPesoCalculado() {
-		return peso+1;
+		return peso + 1;
 	}
 
 	public void setPeso(int peso) {
@@ -94,6 +123,17 @@ public class PuntoPeso implements Comparable <PuntoPeso>{
 		this.pesoAcumulado = pesoAcumulado;
 	}
 
+	public void setPesoAcumulado(PuntoPeso anterior, boolean esDiagonal) {
+		int nuevoPesoAcumulado = 0;
+
+		if (!esDiagonal)
+			nuevoPesoAcumulado = anterior.getPesoAcumulado() + this.getPesoCalculado() * 10;
+		else
+			nuevoPesoAcumulado = anterior.getPesoAcumulado() + this.getPesoCalculado() * 14;
+
+		this.pesoAcumulado = nuevoPesoAcumulado;
+	}
+
 	public int getDistanciaAlDestino() {
 		return distanciaAlDestino;
 	}
@@ -106,8 +146,8 @@ public class PuntoPeso implements Comparable <PuntoPeso>{
 		return totalPesoDistancia;
 	}
 
-	public void setTotalPesoDistancia(int totalPesoDistancia) {
-		this.totalPesoDistancia = totalPesoDistancia;
+	public void setTotalPesoDistancia() {
+		this.totalPesoDistancia = this.pesoAcumulado + this.distanciaAlDestino;
 	}
 
 	public PuntoPeso getPredecesor() {
@@ -124,12 +164,6 @@ public class PuntoPeso implements Comparable <PuntoPeso>{
 
 	public void setPunto(Punto punto) {
 		this.punto = punto;
-	}
-
-	@Override
-	public int compareTo(PuntoPeso arg0) {
-		
-		return 0;
 	}
 
 }
