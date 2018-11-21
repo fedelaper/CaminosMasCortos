@@ -32,58 +32,22 @@ public class CmcDemoB {
 		Punto a = mapa.getPuntos().get(0);
 		Punto b = mapa.getPuntos().get(1);
 
-		List<PuntoPeso> visitados = new ArrayList<PuntoPeso>();
+		List<PuntoPeso> path = findPath(puntoToPuntoPeso(a, mapa.getDensidad(a.x, a.y)), puntoToPuntoPeso(b, mapa.getDensidad(b.x, b.y)));
 
-		searchPath(puntoToPuntoPeso(a, mapa.getDensidad(a.x, a.y)), puntoToPuntoPeso(b, mapa.getDensidad(b.x, b.y)),
-				visitados);
+//		searchPath(puntoToPuntoPeso(a, mapa.getDensidad(a.x, a.y)), puntoToPuntoPeso(b, mapa.getDensidad(b.x, b.y)),
+//				visitados);
 //		this.obtenerElMejorCamino(visitados)
-		List<Punto> listaPuntos = listaPPtoPunto(visitados);
+		List<Punto> listaPuntos = listaPPtoPunto(path);
 		
 		cmc.dibujarCamino(listaPuntos, Color.red);
 		mapa.enviarMensaje("Camino minimo: " + listaPuntos.size() + " puntos");
 	}
-	/*
-	 * private List<PuntoPeso> buscarCamino(PuntoPeso a, PuntoPeso b,
-	 * List<PuntoPeso> visitados) { List<PuntoPeso> listaPuntos = new
-	 * ArrayList<PuntoPeso>(); List<PuntoPeso> posiblesCaminos = buscarPuntos(a, b);
-	 * List<PuntoPeso> menor = new ArrayList<PuntoPeso>(); for (PuntoPeso punto :
-	 * posiblesCaminos) { if (!visitados.contains(punto)) { //TODO: seleccionar el
-	 * que tenga menor totalPesoDistancia. // de existir dos, selecionar el que
-	 * tenga menor seleccionar el de menor peso. if (!sonPuntosIguales(punto, b)) {
-	 * visitados.add(punto); menor = buscarCamino(punto, b, visitados);
-	 * menor.add(punto); listaPuntos = calcularMenor(menor, listaPuntos); } else {
-	 * listaPuntos.add(b); return listaPuntos; } } } return listaPuntos; }
-	 */
-
-//	private List<PuntoPeso> buscarCamino2(PuntoPeso a, PuntoPeso b, List<PuntoPeso> visitados) {
-//		List<PuntoPeso> listaPuntos = new ArrayList<PuntoPeso>();
-//		List<PuntoPeso> posiblesCaminos = buscarPuntos(a, b);
-//		List<PuntoPeso> menor = new ArrayList<PuntoPeso>();
-//		for (PuntoPeso punto : posiblesCaminos) {
-//			if (!visitados.contains(punto)) {
-//				// TODO: seleccionar el que tenga menor totalPesoDistancia.
-//				// de existir dos, selecionar el que tenga menor seleccionar el de menor peso.
-//				if (!sonPuntosIguales(punto, b)) {
-//					if (esElMejorCamino(punto, posiblesCaminos)) {
-//						visitados.add(punto);
-//						menor = buscarCamino2(punto, b, visitados);
-//						menor.add(punto);
-//						listaPuntos = calcularMenor(menor, listaPuntos);
-//					}
-//				} else {
-//					listaPuntos.add(b);
-//					return listaPuntos;
-//				}
-//			}
-//		}
-//		return listaPuntos;
-//	}
 
 	private boolean searchPath(PuntoPeso origen, PuntoPeso destino, List<PuntoPeso> visitados) {
-		List<PuntoPeso> adyacentes = this.buscarPuntos(origen, destino, visitados);
+		List<PuntoPeso> adyacentes = origen.getAdyacentes(destino, visitados, mapa);
 		boolean encontroB = false;
 
-		ordenarPorHeuristica(adyacentes);
+		Collections.sort(adyacentes);
 
 		while (!adyacentes.isEmpty() && !encontroB) {
 
@@ -97,27 +61,84 @@ public class CmcDemoB {
 				encontroB = true;
 			}
 
+			if(adyacentes == null || adyacentes.isEmpty()) {
+				System.out.println("error");
+			}
+			primero.setPredecesor(adyacentes.get(0));
 		}
 		return encontroB;
-//		PuntoPeso primero = adyacentes.remove(0);
-//
-//		visitados.add(origen);
-//		if (primero.equals(destino)) {
-//			visitados.add(destino);
-//		}else {
-//			if(!visitados.contains(primero)) {
-//				this.searchPath(adyacentes.get(0), destino, visitados);
-//			}else{
-//				
-//			}
-//		}
 
-//		if (!visitados.contains(primero) && !primero.equals(destino)) {
-//			this.searchPath(adyacentes.get(0), destino, visitados);
-//		} else if (primero.equals(destino)) {
-//			visitados.add(destino);
-//		}
+	}
+	
+	public List<PuntoPeso> findPath(PuntoPeso origen, PuntoPeso destino) {
+		List<PuntoPeso> openList = new ArrayList<PuntoPeso>();
+		List<PuntoPeso> closedList = new ArrayList<PuntoPeso>();
+	
+//		origen.setPesoAcumulado(0);
+//		origen.setDistanciaAlDestino(calcularDistanciaAlDestino(origen,destino));
+//		origen.setPredecesor(null);
+	    openList.add(origen);
+	    PuntoPeso puntoDestino = null;
+	    boolean destinoEncontrado = Boolean.FALSE;
+	    while (!openList.isEmpty() && !destinoEncontrado) {
+	    	Collections.sort(openList);
+	    	PuntoPeso punto = openList.remove(0);
+	    	closedList.add(punto);
+	    	
+	        if (punto.equals(destino)) {
+	          // construct the path from start to goal
+	        	puntoDestino = punto;
+	        	destinoEncontrado = Boolean.TRUE;
+	        	
+	         // return constructPath(destino);
+	        }else {
+	        
+		        List<PuntoPeso> adyacentes = punto.getAdyacentes(destino, closedList, mapa); 
+		        Collections.sort(adyacentes);
+		        for (int i=0; i<adyacentes.size(); i++) {
+		        	PuntoPeso puntoAdyacente = adyacentes.get(i);
+	//	        	boolean estaAbierto = openList.contains(puntoAdyacente);
+	//	        	boolean estaCerrado = closedList.contains(puntoAdyacente);
+		        	int totalPesoDistancia = punto.getPesoAcumulado() + puntoAdyacente.getPesoCalculado();
+		        	
+		        	if (!openList.contains(puntoAdyacente) /*|| totalPesoDistancia < puntoAdyacente.getTotalPesoDistancia()*/){
+	//	        		puntoAdyacente.setPredecesor(punto);  
+	//	        		puntoAdyacente.setTotalPesoDistancia(totalPesoDistancia);
+	//	        		puntoAdyacente.setDistanciaAlDestino(calcularDistanciaAlDestino(puntoAdyacente,destino));
+		        		if(openList.contains(puntoAdyacente)) {
+		        			PuntoPeso puntoAbierto = openList.get(openList.indexOf(puntoAdyacente));
+		        			if(puntoAdyacente.getPesoAcumulado() < puntoAbierto.getPesoAcumulado()) {
+		        				openList.remove(puntoAbierto);
+		        				openList.add(puntoAdyacente);
+		        			}
+		        		}else {
+		        			if (closedList.contains(puntoAdyacente)) {
+		        				closedList.remove(puntoAdyacente);
+		        			}
+		        			openList.add(puntoAdyacente);
+		        			
+		        		}
+		              }
+		            }
+		            closedList.add(punto);
+		        }
+	          }
 
+	          // no path found
+		if(destinoEncontrado) {
+			return constructPath(puntoDestino);
+		}else {
+			return new ArrayList<PuntoPeso>();
+		}
+	}
+	
+	protected List<PuntoPeso> constructPath(PuntoPeso punto) {
+		List<PuntoPeso> path = new ArrayList<PuntoPeso>();
+		while (punto.getPredecesor() != null) {
+			path.add(punto);
+			punto = punto.getPredecesor();
+		}
+		return path;
 	}
 
 //	private List<PuntoPeso> elegirMejorCamino(List<PuntoPeso> visitados) {
@@ -134,11 +155,6 @@ public class CmcDemoB {
 //		
 //		return mejorCamino;
 //	}
-
-	// Ordena de menor a mayor segun el totalPesoDistancia
-	private void ordenarPorHeuristica(List<PuntoPeso> adyacentes) {
-		Collections.sort(adyacentes);
-	}
 
 	private List<PuntoPeso> obtenerElMejorCamino(List<PuntoPeso> posiblesCaminos) {
 		List<PuntoPeso> mejorCamino = new ArrayList<PuntoPeso>();
@@ -192,149 +208,4 @@ public class CmcDemoB {
 //		return listaA;
 //	}
 
-	// Devuelve una lista de puntos adyacentes al punto "a".
-	// No devuelve puntos inválidos.
-	private List<PuntoPeso> buscarPuntos(PuntoPeso a, PuntoPeso b, List<PuntoPeso> visitados) {
-		List<PuntoPeso> listaPuntos = new ArrayList<PuntoPeso>();
-		PuntoPeso auxiliar = new PuntoPeso(a);
-		boolean esDiagonal = true;
-
-		// punto(oginal.x,(original.y)-1)
-		auxiliar.setY(auxiliar.getYmenos());
-		auxiliar.setPredecesor(a);
-		
-		if (esPuntoValido(auxiliar) && !estaVisitado(auxiliar, visitados)) {
-			auxiliar.setPeso(mapa.getDensidad(auxiliar.getX(), auxiliar.getY()));
-			auxiliar.setPesoAcumulado(a, !esDiagonal);
-			auxiliar.setDistanciaAlDestino(calcularDistanciaAlDestino(auxiliar, b));
-			auxiliar.setTotalPesoDistancia();
-			listaPuntos.add(auxiliar);
-		}
-
-		// punto((oginal.x)-1,(original.y)-1)
-		auxiliar.setX(auxiliar.getXmenos());
-
-		if (esPuntoValido(auxiliar) && !estaVisitado(auxiliar, visitados)) {
-			auxiliar.setPeso(mapa.getDensidad(auxiliar.getX(), auxiliar.getY()));
-			auxiliar.setPesoAcumulado(a, esDiagonal);
-			auxiliar.setDistanciaAlDestino(calcularDistanciaAlDestino(auxiliar, b));
-			auxiliar.setTotalPesoDistancia();
-			PuntoPeso auxiliar2 = new PuntoPeso(auxiliar);
-			listaPuntos.add(auxiliar2);
-		}
-
-		// punto((oginal.x)-1,(original.y))
-		auxiliar.setY(auxiliar.getYmas());
-
-		if (esPuntoValido(auxiliar) && !estaVisitado(auxiliar, visitados)) {
-			auxiliar.setPeso(mapa.getDensidad(auxiliar.getX(), auxiliar.getY()));
-			auxiliar.setPesoAcumulado(a, !esDiagonal);
-			auxiliar.setDistanciaAlDestino(calcularDistanciaAlDestino(auxiliar, b));
-			auxiliar.setTotalPesoDistancia();
-			PuntoPeso auxiliar3 = new PuntoPeso(auxiliar);
-			listaPuntos.add(auxiliar3);
-		}
-
-		auxiliar.setY(auxiliar.getYmas());
-
-		if (esPuntoValido(auxiliar) && !estaVisitado(auxiliar, visitados)) {
-			auxiliar.setPeso(mapa.getDensidad(auxiliar.getX(), auxiliar.getY()));
-			auxiliar.setPesoAcumulado(a, esDiagonal);
-			auxiliar.setDistanciaAlDestino(calcularDistanciaAlDestino(auxiliar, b));
-			auxiliar.setTotalPesoDistancia();
-			PuntoPeso auxiliar4 = new PuntoPeso(auxiliar);
-			listaPuntos.add(auxiliar4);
-		}
-
-		auxiliar.setX(auxiliar.getXmas());
-
-		if (esPuntoValido(auxiliar) && !estaVisitado(auxiliar, visitados)) {
-			auxiliar.setPeso(mapa.getDensidad(auxiliar.getX(), auxiliar.getY()));
-			auxiliar.setPesoAcumulado(a, !esDiagonal);
-			auxiliar.setDistanciaAlDestino(calcularDistanciaAlDestino(auxiliar, b));
-			auxiliar.setTotalPesoDistancia();
-			PuntoPeso auxiliar5 = new PuntoPeso(auxiliar);
-			listaPuntos.add(auxiliar5);
-		}
-
-		auxiliar.setX(auxiliar.getXmas());
-
-		if (esPuntoValido(auxiliar) && !estaVisitado(auxiliar, visitados)) {
-			auxiliar.setPeso(mapa.getDensidad(auxiliar.getX(), auxiliar.getY()));
-			auxiliar.setPesoAcumulado(a, esDiagonal);
-			auxiliar.setDistanciaAlDestino(calcularDistanciaAlDestino(auxiliar, b));
-			auxiliar.setTotalPesoDistancia();
-			PuntoPeso auxiliar6 = new PuntoPeso(auxiliar);
-			listaPuntos.add(auxiliar6);
-		}
-
-		auxiliar.setY(auxiliar.getYmenos());
-
-		if (esPuntoValido(auxiliar) && !estaVisitado(auxiliar, visitados)) {
-			auxiliar.setPeso(mapa.getDensidad(auxiliar.getX(), auxiliar.getY()));
-			auxiliar.setPesoAcumulado(a, !esDiagonal);
-			auxiliar.setDistanciaAlDestino(calcularDistanciaAlDestino(auxiliar, b));
-			auxiliar.setTotalPesoDistancia();
-			PuntoPeso auxiliar7 = new PuntoPeso(auxiliar);
-			listaPuntos.add(auxiliar7);
-		}
-
-		auxiliar.setY(auxiliar.getYmenos());
-
-		if (esPuntoValido(auxiliar) && !estaVisitado(auxiliar, visitados)) {
-			auxiliar.setPeso(mapa.getDensidad(auxiliar.getX(), auxiliar.getY()));
-			auxiliar.setPesoAcumulado(a, esDiagonal);
-			auxiliar.setDistanciaAlDestino(calcularDistanciaAlDestino(auxiliar, b));
-			auxiliar.setTotalPesoDistancia();
-			PuntoPeso auxiliar8 = new PuntoPeso(auxiliar);
-			listaPuntos.add(auxiliar8);
-		}
-
-		return listaPuntos;
-	}
-
-	// Devuelve la distancia del punto a, al punto b. No coincidera paredes ni
-	// densidades.
-	private int calcularDistanciaAlDestino(PuntoPeso a, PuntoPeso b) {
-		int distancia = 0;
-		if (a.getX() < b.getX()) {
-			for (int x = a.getX(); x < b.getX(); x++) {
-				distancia+=10;
-			}
-		} else {
-			for (int x = a.getX(); x > b.getX(); x--) {
-				distancia+=10;
-			}
-		}
-		if (a.getY() < b.getY()) {
-			for (int y = a.getY(); y < b.getY(); y++) {
-				distancia+=10;
-			}
-		} else {
-			for (int y = a.getY(); y > b.getY(); y--) {
-				distancia+=10;
-			}
-		}
-		return distancia;
-	}
-
-	// Devuelve verdadero si el punto no es una pared, ni se sale del mapa.
-	private boolean esPuntoValido(PuntoPeso punto) {
-		if (punto.getY() < 0 || punto.getX() < 0 || punto.getX() > MapaInfo.LARGO || punto.getY() > MapaInfo.ALTO) {
-			return false;
-		}
-		if (punto.getPeso()-1 == MapaInfo.MAX_DENSIDAD) {
-			return false;
-		}
-		return true;
-	}
-
-	private boolean estaVisitado(PuntoPeso pp, List<PuntoPeso> lista) {
-		return lista.contains(pp);
-	}
-
-	// Devuelve verdadero, si los dos puntos son iguales.
-	private boolean sonPuntosIguales(PuntoPeso a, PuntoPeso b) {
-		return (a.getX() == b.getX() && a.getY() == b.getY());
-	}
 }
