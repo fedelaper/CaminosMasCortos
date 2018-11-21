@@ -1,5 +1,7 @@
 package cmc;
 
+import graficos.Punto;
+
 public class PuntoUtils {
 
 	// Devuelve la distancia del punto a, al punto b. No considera paredes ni
@@ -26,5 +28,13 @@ public class PuntoUtils {
 			}
 			return distancia;
 		}
-	
+		public static Punto puntoPesoToPunto(PuntoPeso puntoPeso) {
+			Punto punto = new Punto(puntoPeso.getX(), puntoPeso.getY());
+			return punto;
+		}
+
+		public static PuntoPeso puntoToPuntoPeso(Punto punto, int peso) {
+			PuntoPeso puntoPeso = new PuntoPeso(punto, peso, 0, 0, null);
+			return puntoPeso;
+		}
 }

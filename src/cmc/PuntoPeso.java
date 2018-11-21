@@ -47,7 +47,7 @@ public class PuntoPeso implements Comparable<PuntoPeso> {
 	
 	// Devuelve una lista de puntos adyacentes al punto "a".
 	// No devuelve puntos inválidos.
-	public List<PuntoPeso> getAdyacentes(PuntoPeso destino, List<PuntoPeso> visitados, MapaInfo mapa) {
+	public List<PuntoPeso> getAdyacentes(PuntoPeso destino, MapaInfo mapa) {
 		List<PuntoPeso> listaPuntos = new ArrayList<PuntoPeso>();
 		boolean esDiagonal = true;
 
