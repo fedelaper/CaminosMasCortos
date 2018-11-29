@@ -16,6 +16,7 @@ public class CmcImple extends CmcSC {
 	
 	public void run(MapaInfo mapa) {
 		this.mapa = mapa;
-		new CmcDemoB(mapa, this);
+		new CaminoMasCorto(mapa, this);
 	}
 }
+ 
